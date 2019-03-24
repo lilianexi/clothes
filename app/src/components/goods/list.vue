@@ -1,0 +1,138 @@
+<template>
+    <div class="app-list">
+        <header class="mui-bar mui-bar-nav">
+                <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" href="#/"></a>
+                <div class="mui-input-row mui-search">
+                    <input type="search" class="mui-input-clear" placeholder="古风古色" v-model="keywords">
+                </div>
+                <a class="mui-icon mui-icon-search"  @click="search"></a>
+        </header>
+        <v-touch v-on:swipeup="onSwipeUp" tag="div" class="content">
+                <div class="content-item"  v-for="item in list" :key="item.id" >
+                    <img v-lazy="item.img_url" @click="getInfo" :data-lid="item.lid">
+                    ￥<span class="price">{{item.price}}</span>
+                    <p class="detail">{{item.title}}</p>
+                </div>
+        </v-touch>
+        <div class="d"></div>
+        <Nav></Nav>
+    </div>
+
+</template>
+<script>
+import Nav from '@/components/nav.vue'
+import  {Toast} from 'mint-ui'
+export default {
+    data(){
+        return{
+            list:[],
+            pno:1,
+            pageSize:4,
+            search_content:"",
+            keywords:"",
+            family_id:this.$route.query.family_id
+        }
+    },
+    methods:{
+        search(){
+            var url="http://gufeng.applinzi.com/search?pno="+this.pno+"&pageSize="+this.pageSize+"&key="+this.key;
+            this.axios.get(url).then(result=>{
+            this.key=this.keywords;
+            this.list=result.data.data
+            })
+        },
+        getpage(){
+                 var family_id=this.family_id
+                var url="http://gufeng.applinzi.com"+ "/products?family_id="+this.family_id+"&pno=" +this.pno+ "&pageSize=" +this.pageSize;
+                this.axios.get(url).then(result=>{
+                    // console.log(result)
+                    this.list=result.data.data
+                // var rows=this.list.concat(result.data.data)
+                // this.list=rows;
+                })
+            },
+            // 获取商品详细信息
+        getInfo(e){
+         var lid = e.target.dataset.lid;
+        //  console.log( e.target.dataset)
+         this.$router.push("/goodDetail?pid="+lid);
+      },
+        onSwipeUp(){
+            console.log("d")
+                this.pno++;
+                var url="http://gufeng.applinzi.com"+"/products?family_id="+this.family_id+"&pno="+this.pno+"&pageSize="+this.pageSize;
+                this.axios.get(url).then(result=>{
+                    console.log(result)
+                    var rows=this.list.concat(result.data.data)
+                    this.list=rows;
+                })
+            },
+     
+    },
+    created(){
+        
+        this.getpage();
+    },
+      components:{
+           Nav
+       }
+       
+
+}
+</script>
+<style>
+/* .d{height:20px;margin-bottom:1230px} */
+.mui-bar{
+    display: flex;
+    justify-content: space-between;
+}
+.mui-bar .mui-input-row .mui-input-clear{
+    border:1px solid #fff;
+    margin-left:0
+}
+.mui-bar .mui-action-back,.mui-icon-search{
+    color:#fff
+}
+.mui-bar input[type='search']::-webkit-input-placeholder {
+    color:#ccc
+}
+
+.app-list .content{
+        list-style: none;
+        display: flex;
+        flex-wrap:wrap;
+        justify-content: space-between;
+        padding-left:0;
+        margin-top:44px
+        }
+    .app-list  .content .content-item{
+        width:50%;
+        background:#fff;
+        border:1px solid #ccc;
+        border-radius: 10px;
+        margin-top:10px
+    }
+    .app-list  .content .content-item img{
+        width:100%;
+        height:185.6px
+    }
+    .app-list  .wz{
+        text-align: center;
+        font-size: 10px;
+        color:#c2beb2;
+        font-weight: bold;
+        overflow: hidden;
+    }
+    .app-list  .price{
+        display: inline-block;
+        color:red;
+        font-size:24px;
+        margin-top:11px
+    }
+    .app-list  .detail{
+        font-size:10px
+    }
+</style>
+
+
+       

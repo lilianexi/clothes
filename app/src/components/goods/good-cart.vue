@@ -1,0 +1,235 @@
+<template>
+    <div class="app-cart">
+        <header class="mui-bar mui-bar-nav">
+                <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" @click="go"></a> 
+                <h1 class="mui-title">购物车</h1>                                                   
+        </header>
+        <div class="mui-card cardList">
+                <div class="mui-card-content" v-for="(item,i) in list" :key="item.i" > 
+					<v-touch  v-on:swipeleft="onSwipeleft(i)"   v-on:swiperight="onSwiperight" tag="div" class="mui-card-content-inner contList" :class="slideClass== i ?'slide':''">
+                        <input type="checkbox" :checked="item.cb" :data-i="i" @click="modifyItem">
+                        <img :src="item.img_url" class="pic">
+                        <div class="details">
+                            <p>{{item.title}}</p>
+                            ￥<label>{{item.price}}</label>
+                            <div class="mui-numbox">
+                                <button class="mui-btn mui-btn-numbox-minus" type="button" @click="goodSub(i)">-</button>
+                                <input class="mui-input-numbox" type="number" value="1" v-model="item.count"/>
+                                <button class="mui-btn mui-btn-numbox-plus" type="button" @click="goodAdd(i)">+</button>
+			                </div>
+                        </div>
+                    </v-touch>                       
+                    <div class="deleItem">
+                        <p  @click="delitem()">删除</p>
+                    </div>
+                </div>
+        </div>
+        <div class="total">
+                    <input type="checkbox" class="circle" @click="selectAll" :checked="allcb">
+                    <p>全选</p>
+                    <span>合计：￥{{getTotal}}</span>
+                    <button>结算</button>
+                    
+        </div>
+        <Nav></Nav>
+    </div>
+</template>
+<script>
+  import Nav from '@/components/nav.vue'
+  import Header from '@/components/header.vue'
+  import {Toast} from 'mint-ui'
+  export default{
+    data(){
+          return{
+            count:1,
+            list:[],
+            cb:false,
+            allcb:false,
+            sum:0,
+            slideClass:-1,
+            no:false,
+            }
+        },  
+        computed:{
+             //购物车总价
+             
+             getTotal(){
+                 var total=0
+                 this.list.forEach((item )=> {
+                    if(!item.cb){
+                    total+=(item.count*item.price);
+                     }
+                 })
+                 return total
+             },
+        },
+        created(){
+            this.getList();
+          
+        },
+    methods:{
+            go(){
+                  this.$router.go(-1);
+            },
+            onSwipeleft(i){
+                this.slideClass=i;
+            },
+            onSwiperight(i){
+                 this.slideClass=i;
+            },
+            
+            //复选框是否选中
+            getList(){
+                this.axios.get("http://gufeng.applinzi.com/cartlist?uid=1").then(result=>{
+                this.list=result.data.data;
+                for(var item of this.list){
+                    item.cb=false;
+                    item.cb=this.cb;
+                    }
+                })
+             },
+             //全选
+              modifyItem(e){
+                var idx = e.target.dataset.i;
+                var checked = e.target.checked;
+                this.list[idx].cb = checked;
+                var count = 0;
+                for(var item of this.list){
+                    if(item.cb){
+                        count++;
+                    }
+                }
+                if(count==this.list.length){
+                this.allcb = true;
+                }else{
+                this.allcb = false;
+                }
+            },
+           
+            goodAdd(i){   
+                this.list[i].count++;
+         
+             },
+            goodSub(i){    
+                if(this.list[i].count > 1){
+                this.list[i].count--;
+                }
+            },
+            delitem(i){
+                this.list.splice(i,1) 
+                this.slideClass=i;
+            },
+            selectAll(e){
+                var cb = e.target.checked;
+                this.allcb = cb;
+                for(var item of this.list){
+                item.cb = cb;
+                }
+            },
+            
+           
+            
+        }, 
+    components:{
+           Nav,
+           Header
+    },
+     
+  }
+</script>
+<style>
+    .app-cart .mui-card{
+        padding-bottom:100px
+    }
+    .mui-card p,.total p{
+    color:#000;
+    margin:14px 0
+    }
+    .slide{
+        transition:  0.2s ease-in 0.2s;
+        transform: translate3d(-60px, 0px, 0px);
+    }
+    .mui-card.cardList{
+        margin:55px 0 0 0;
+    }
+    .mui-card.cardList input:first-child{
+        margin-top:43px
+    }
+    .circle{
+        display:inline-block;
+        border-radius:50%;
+        border:1px solid #ccc;
+        cursor: pointer;   
+
+    }
+    .contList{
+     display:flex;
+     justify-content:space-between;
+     background:#fff;
+     z-index: 10;
+    }
+    .mui-card-content-inner .circle{
+        position:relative;
+         top:40px;
+         left:-14px
+    }
+    .mui-card-content-inner .pic{
+        width:7rem;
+        height:7rem;
+        margin-top:5px
+    }
+    .mui-card-content-inner .details{
+        margin-left:10px
+    }
+    .mui-card-content-inner .details label{
+        font-size:20px;
+        color:red;
+    }
+    .mui-card-content {border-top:1px solid #ccc}
+    .mui-card-content p{float:right}
+    .deleItem{
+        color: #fff;
+        background: #f50!important;
+        cursor: pointer;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        overflow: hidden;
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 3.6rem;
+        border-top: .01333rem solid #f5f5f5;
+        border-bottom: .01333rem solid #f5f5f5;
+     }
+    .deleItem p{
+         color:#fff
+     }
+    /* 底部结算位置 */
+    .total{
+        width:100%;
+        height:44px;
+        background:#fff;
+        position: fixed;
+        bottom:53px;
+        font-size:15px;
+        vertical-align: middle;
+        display:flex;
+        justify-content: space-between;
+        z-index:100
+    }
+    .total .circle{
+        margin:13px 15px 1px 10px;
+        padding: 11px;
+        width: 14px;
+    }
+    .total  span{margin-left:100px;margin-top:13px}
+    .total button{
+        color: #fff;
+        background: #f50;
+        height:46px;
+        width:22%
+    }
+   /*   .mui-card-content-inner .details .mui-numbox button{border:none}*/
+</style>

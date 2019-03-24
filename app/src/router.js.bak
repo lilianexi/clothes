@@ -1,0 +1,29 @@
+import Vue from 'vue'
+import Router from 'vue-router'
+import HelloContainer from "./components/HelloWorld.vue"
+import exam01 from "./components/exam01.vue"
+import list from "./components/list.vue"
+import home from "./components/tabbar/home.vue"
+import NewsList from "./components/home/NewsList.vue"
+import goodList from "./components/goods/goodList.vue"
+import Newsinfo from "./components/home/Newsinfo"
+import GoodInfo from "./components/goods/GoodInfo.vue"
+import Login from "./components/home/Login.vue"
+import shopcart from "./components/home/shopcart.vue"
+Vue.use(Router)
+
+export default new Router({
+  routes: [
+   {path:'/',redirect:"/home"},
+    {path:'/exam01',component:exam01} ,
+    {path:'/list',component:list} ,
+    {path:'/home',component:home} ,
+    {path:'/NewsList',component:NewsList} ,
+    {path:'/goodList',component:goodList},
+    {path:'/Newsinfo',component:Newsinfo},
+   {path:'/GoodInfo',component:GoodInfo},
+   {path:'/Login',component:Login},
+   {path:'/shopcart',component:shopcart}//写明确的路径
+  ]
+
+})
